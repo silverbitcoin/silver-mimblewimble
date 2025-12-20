@@ -56,7 +56,7 @@ impl Kernel {
     }
     
     /// Verify the kernel
-    pub fn verify(&self, parameters: &MimblewimbleParameters) -> Result<bool> {
+    pub fn verify(&self, _parameters: &MimblewimbleParameters) -> Result<bool> {
         // Verify excess is valid
         if self.excess.is_empty() {
             return Ok(false);

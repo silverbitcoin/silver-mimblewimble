@@ -25,7 +25,6 @@ pub use proof::Proof;
 pub use range_proof::RangeProof;
 pub use transaction::Transaction;
 
-use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use parking_lot::RwLock;
 
