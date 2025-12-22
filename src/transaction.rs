@@ -59,7 +59,6 @@ impl Transaction {
 mod tests {
     use super::*;
     use crate::kernel::KernelFeatures;
-    use crate::range_proof::RangeProof;
     
     #[test]
     fn test_transaction_creation() {
