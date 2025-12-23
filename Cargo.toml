@@ -1,46 +1,48 @@
 [package]
 name = "silver-mimblewimble"
 version = "2.5.3"
-edition.workspace = true
-authors.workspace = true
-license.workspace = true
-repository.workspace = true
+edition = "2021"
+rust-version = "1.90"
+authors = ["SilverBitcoin Team <team@silverbitcoin.org>"]
+license = "Apache-2.0"
+repository = "https://github.com/silverbitcoin/silverbitcoin"
+homepage = "https://silverbitcoin.org"
 keywords = ["mimblewimble", "scaling", "privacy", "blockchain"]
 categories = ["cryptography"]
+description = "MimbleWimble scaling protocol for SilverBitcoin 512-bit blockchain"
 
 [dependencies]
-tokio.workspace = true
-serde.workspace = true
-serde_json.workspace = true
-bincode.workspace = true
-blake3.workspace = true
-sha2.workspace = true
-rand.workspace = true
-rand_core.workspace = true
-zeroize.workspace = true
-thiserror.workspace = true
-anyhow.workspace = true
-tracing.workspace = true
-bytes.workspace = true
-hex.workspace = true
+tokio = { version = "1.48", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+rand = { version = "0.8", features = ["std", "std_rng"] }
+rand_core = { version = "0.6", features = ["std"] }
+zeroize = { version = "1.7", features = ["derive"] }
+thiserror = "1.0"
+anyhow = "1.0"
+tracing = "0.1"
+bytes = "1.5"
+hex = "0.4"
 
-# Cryptography
-secp256k1.workspace = true
-ed25519-dalek.workspace = true
-chacha20poly1305.workspace = true
+# Cryptography (512-bit only)
+p521 = "0.13"
+pqcrypto-sphincsplus = "0.7"
+pqcrypto-dilithium = "0.5"
+aes-gcm = "0.10"
 
 # Utilities
-parking_lot.workspace = true
-dashmap.workspace = true
-crossbeam.workspace = true
-rayon.workspace = true
-lru.workspace = true
+parking_lot = "0.12"
+dashmap = "5.5"
+crossbeam = "0.8"
+rayon = "1.8"
+lru = "0.12"
 
 [dev-dependencies]
-proptest.workspace = true
-criterion.workspace = true
-tempfile.workspace = true
-pretty_assertions.workspace = true
+proptest = "1.4"
+criterion = { version = "0.5", features = ["html_reports", "async_tokio"] }
+tempfile = "3.8"
+pretty_assertions = "1.4"
 
 [[bench]]
 name = "mimblewimble_benchmarks"

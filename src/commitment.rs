@@ -1,7 +1,8 @@
 //! Pedersen commitments for Mimblewimble
 
 use serde::{Deserialize, Serialize};
-use blake3::Hasher;
+use sha2::{Sha512, Digest};
+use hex;
 use crate::errors::Result;
 use crate::range_proof::RangeProof;
 
@@ -25,11 +26,11 @@ impl Commitment {
     /// Create a new commitment
     pub fn new(value: u64, blinding: Vec<u8>, range_proof: RangeProof) -> Result<Self> {
         // Compute commitment: H(value || blinding)
-        let mut hasher = Hasher::new();
-        hasher.update(&value.to_le_bytes());
+        let mut hasher = Sha512::new();
+        hasher.update(value.to_le_bytes());
         hasher.update(&blinding);
         
-        let commitment = hasher.finalize().as_bytes().to_vec();
+        let commitment = hex::encode(hasher.finalize()).into_bytes();
         
         Ok(Self {
             commitment,

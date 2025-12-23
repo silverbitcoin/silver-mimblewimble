@@ -1,7 +1,8 @@
 //! Range proofs for Mimblewimble
 
 use serde::{Deserialize, Serialize};
-use blake3::Hasher;
+use sha2::{Sha512, Digest};
+use hex;
 use crate::errors::Result;
 use crate::parameters::MimblewimbleParameters;
 
@@ -21,11 +22,11 @@ impl RangeProof {
     /// Create a range proof for a value
     pub fn create(value: u64, parameters: &MimblewimbleParameters) -> Result<Self> {
         // Generate range proof
-        let mut hasher = Hasher::new();
-        hasher.update(&value.to_le_bytes());
-        hasher.update(&parameters.range_proof_bits.to_le_bytes());
+        let mut hasher = Sha512::new();
+        hasher.update(value.to_le_bytes());
+        hasher.update(parameters.range_proof_bits.to_le_bytes());
         
-        let proof_data = hasher.finalize().as_bytes().to_vec();
+        let proof_data = hex::encode(hasher.finalize()).into_bytes();
         
         Ok(Self { proof_data })
     }

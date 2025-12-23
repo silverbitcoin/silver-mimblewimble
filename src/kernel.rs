@@ -1,7 +1,8 @@
 //! Transaction kernels for Mimblewimble
 
 use serde::{Deserialize, Serialize};
-use blake3::Hasher;
+use sha2::{Sha512, Digest};
+use hex;
 use crate::errors::Result;
 use crate::parameters::MimblewimbleParameters;
 
@@ -68,13 +69,13 @@ impl Kernel {
         }
         
         // Verify kernel hash
-        let mut hasher = Hasher::new();
-        hasher.update(&bincode::serialize(&self.features).unwrap_or_default());
-        hasher.update(&self.fee.to_le_bytes());
-        hasher.update(&self.lock_height.to_le_bytes());
+        let mut hasher = Sha512::new();
+        hasher.update(serde_json::to_vec(&self.features).unwrap_or_default());
+        hasher.update(self.fee.to_le_bytes());
+        hasher.update(self.lock_height.to_le_bytes());
         hasher.update(&self.excess);
         
-        let kernel_hash = hasher.finalize().as_bytes().to_vec();
+        let kernel_hash = hex::encode(hasher.finalize()).into_bytes();
         
         // Verify signature matches kernel hash
         Ok(!kernel_hash.is_empty())

@@ -1,7 +1,9 @@
 //! Proofs for Mimblewimble
 
 use serde::{Deserialize, Serialize};
-use blake3::Hasher;
+use sha2::{Sha512, Digest};
+use hex;
+use serde_json;
 
 /// Proof structure
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -34,10 +36,10 @@ impl Proof {
     
     /// Get proof hash
     pub fn hash(&self) -> Vec<u8> {
-        let mut hasher = Hasher::new();
+        let mut hasher = Sha512::new();
         hasher.update(&self.data);
-        hasher.update(&bincode::serialize(&self.proof_type).unwrap_or_default());
-        hasher.finalize().as_bytes().to_vec()
+        hasher.update(serde_json::to_vec(&self.proof_type).unwrap_or_default());
+        hex::encode(hasher.finalize()).into_bytes()
     }
 }
 

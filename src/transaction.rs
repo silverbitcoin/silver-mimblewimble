@@ -1,6 +1,9 @@
 //! Mimblewimble transactions
 
 use serde::{Deserialize, Serialize};
+use sha2::{Sha512, Digest};
+use hex;
+use serde_json;
 use crate::commitment::Commitment;
 use crate::kernel::Kernel;
 
@@ -43,15 +46,14 @@ impl Transaction {
     
     /// Get transaction size
     pub fn size(&self) -> usize {
-        bincode::serialize(self).unwrap_or_default().len()
+        serde_json::to_vec(self).unwrap_or_default().len()
     }
     
     /// Get transaction hash
     pub fn hash(&self) -> Vec<u8> {
-        use blake3::Hasher;
-        let mut hasher = Hasher::new();
-        hasher.update(&bincode::serialize(self).unwrap_or_default());
-        hasher.finalize().as_bytes().to_vec()
+        let mut hasher = Sha512::new();
+        hasher.update(serde_json::to_vec(self).unwrap_or_default());
+        hex::encode(hasher.finalize()).into_bytes()
     }
 }
 

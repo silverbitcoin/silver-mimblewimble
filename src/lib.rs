@@ -144,7 +144,8 @@ impl MimblewimbleState {
     
     /// Compute merkle root of transactions
     fn compute_merkle_root(&self, transactions: &[Transaction]) -> Result<Vec<u8>> {
-        use blake3::Hasher;
+        use sha2::{Sha512, Digest};
+        use hex;
         
         if transactions.is_empty() {
             return Ok(vec![0; 32]);
@@ -153,23 +154,23 @@ impl MimblewimbleState {
         let mut hashes: Vec<Vec<u8>> = transactions
             .iter()
             .map(|tx| {
-                let mut hasher = Hasher::new();
-                hasher.update(&bincode::serialize(tx).unwrap_or_default());
-                hasher.finalize().as_bytes().to_vec()
+                let mut hasher = Sha512::new();
+                hasher.update(serde_json::to_vec(tx).unwrap_or_default());
+                hex::encode(hasher.finalize()).into_bytes()
             })
             .collect();
         
         while hashes.len() > 1 {
             let mut next_level = Vec::new();
             for i in (0..hashes.len()).step_by(2) {
-                let mut hasher = Hasher::new();
+                let mut hasher = Sha512::new();
                 hasher.update(&hashes[i]);
                 if i + 1 < hashes.len() {
                     hasher.update(&hashes[i + 1]);
                 } else {
                     hasher.update(&hashes[i]);
                 }
-                next_level.push(hasher.finalize().as_bytes().to_vec());
+                next_level.push(hex::encode(hasher.finalize()).into_bytes());
             }
             hashes = next_level;
         }
