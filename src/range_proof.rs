@@ -56,7 +56,20 @@ mod tests {
     #[test]
     fn test_range_proof_verification() {
         let params = MimblewimbleParameters::default();
-        let proof = RangeProof::create(1000, &params).unwrap();
-        assert!(proof.verify(&params).unwrap());
+        match RangeProof::create(1000, &params) {
+            Ok(proof) => {
+                match proof.verify(&params) {
+                    Ok(valid) => assert!(valid),
+                    Err(e) => {
+                        // PRODUCTION: Proper error assertion instead of panic
+                        assert!(false, "Verification failed: {:?}", e);
+                    }
+                }
+            }
+            Err(e) => {
+                // PRODUCTION: Proper error assertion instead of panic
+                assert!(false, "Proof creation failed: {:?}", e);
+            }
+        }
     }
 }

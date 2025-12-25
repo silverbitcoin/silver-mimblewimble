@@ -125,13 +125,21 @@ impl MimblewimbleState {
         
         // Create block header
         let block_height = *self.block_height.read();
+        
+        // Get current timestamp with proper error handling
+        let timestamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or_else(|_| {
+                // Fallback to a reasonable default if system time is before UNIX_EPOCH
+                // This should never happen in practice
+                0
+            });
+        
         let header = BlockHeader {
             version: MIMBLEWIMBLE_VERSION,
             height: block_height,
-            timestamp: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_secs(),
+            timestamp,
             previous_hash: vec![0; 32],
             merkle_root: self.compute_merkle_root(&transactions)?,
         };

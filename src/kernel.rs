@@ -70,7 +70,10 @@ impl Kernel {
         
         // Verify kernel hash
         let mut hasher = Sha512::new();
-        hasher.update(serde_json::to_vec(&self.features).unwrap_or_default());
+        match serde_json::to_vec(&self.features) {
+            Ok(features_bytes) => hasher.update(features_bytes),
+            Err(_) => hasher.update(&[]), // Use empty bytes if serialization fails
+        }
         hasher.update(self.fee.to_le_bytes());
         hasher.update(self.lock_height.to_le_bytes());
         hasher.update(&self.excess);
@@ -111,6 +114,12 @@ mod tests {
             vec![2; 64],
         );
         
-        assert!(kernel.verify(&params).unwrap());
+        match kernel.verify(&params) {
+            Ok(valid) => assert!(valid),
+            Err(e) => {
+                // PRODUCTION: Proper error assertion instead of panic
+                assert!(false, "Kernel verification failed: {:?}", e);
+            }
+        }
     }
 }
