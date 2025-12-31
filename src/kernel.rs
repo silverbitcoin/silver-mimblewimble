@@ -1,26 +1,26 @@
 //! Transaction kernels for Mimblewimble
 
-use serde::{Deserialize, Serialize};
-use sha2::{Sha512, Digest};
-use hex;
 use crate::errors::Result;
 use crate::parameters::MimblewimbleParameters;
+use hex;
+use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha512};
 
 /// Transaction kernel
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Kernel {
     /// Kernel features
     pub features: KernelFeatures,
-    
+
     /// Fee
     pub fee: u64,
-    
+
     /// Lock height
     pub lock_height: u64,
-    
+
     /// Excess commitment
     pub excess: Vec<u8>,
-    
+
     /// Signature
     pub signature: Vec<u8>,
 }
@@ -30,10 +30,10 @@ pub struct Kernel {
 pub enum KernelFeatures {
     /// Plain kernel
     Plain,
-    
+
     /// Coinbase kernel
     Coinbase,
-    
+
     /// Height locked kernel
     HeightLocked,
 }
@@ -55,31 +55,31 @@ impl Kernel {
             signature,
         }
     }
-    
+
     /// Verify the kernel
     pub fn verify(&self, _parameters: &MimblewimbleParameters) -> Result<bool> {
         // Verify excess is valid
         if self.excess.is_empty() {
             return Ok(false);
         }
-        
+
         // Verify signature is valid
         if self.signature.is_empty() {
             return Ok(false);
         }
-        
+
         // Verify kernel hash
         let mut hasher = Sha512::new();
         match serde_json::to_vec(&self.features) {
             Ok(features_bytes) => hasher.update(features_bytes),
-            Err(_) => hasher.update(&[]), // Use empty bytes if serialization fails
+            Err(_) => hasher.update([]), // Use empty bytes if serialization fails
         }
         hasher.update(self.fee.to_le_bytes());
         hasher.update(self.lock_height.to_le_bytes());
         hasher.update(&self.excess);
-        
+
         let kernel_hash = hex::encode(hasher.finalize()).into_bytes();
-        
+
         // Verify signature matches kernel hash
         Ok(!kernel_hash.is_empty())
     }
@@ -88,37 +88,24 @@ impl Kernel {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_kernel_creation() {
-        let kernel = Kernel::new(
-            KernelFeatures::Plain,
-            100,
-            0,
-            vec![1; 32],
-            vec![2; 64],
-        );
-        
+        let kernel = Kernel::new(KernelFeatures::Plain, 100, 0, vec![1; 32], vec![2; 64]);
+
         assert_eq!(kernel.fee, 100);
         assert_eq!(kernel.features, KernelFeatures::Plain);
     }
-    
+
     #[test]
     fn test_kernel_verification() {
         let params = MimblewimbleParameters::default();
-        let kernel = Kernel::new(
-            KernelFeatures::Plain,
-            100,
-            0,
-            vec![1; 32],
-            vec![2; 64],
-        );
-        
+        let kernel = Kernel::new(KernelFeatures::Plain, 100, 0, vec![1; 32], vec![2; 64]);
+
         match kernel.verify(&params) {
             Ok(valid) => assert!(valid),
             Err(e) => {
-                // PRODUCTION: Proper error assertion instead of panic
-                assert!(false, "Kernel verification failed: {:?}", e);
+                panic!("Kernel verification failed: {:?}", e);
             }
         }
     }

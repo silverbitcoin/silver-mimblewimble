@@ -1,16 +1,16 @@
 //! Proofs for Mimblewimble
 
-use serde::{Deserialize, Serialize};
-use sha2::{Sha512, Digest};
 use hex;
+use serde::{Deserialize, Serialize};
 use serde_json;
+use sha2::{Digest, Sha512};
 
 /// Proof structure
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Proof {
     /// Proof data
     pub data: Vec<u8>,
-    
+
     /// Proof type
     pub proof_type: ProofType,
 }
@@ -20,10 +20,10 @@ pub struct Proof {
 pub enum ProofType {
     /// Range proof
     Range,
-    
+
     /// Kernel proof
     Kernel,
-    
+
     /// Block proof
     Block,
 }
@@ -33,7 +33,7 @@ impl Proof {
     pub fn new(data: Vec<u8>, proof_type: ProofType) -> Self {
         Self { data, proof_type }
     }
-    
+
     /// Get proof hash
     pub fn hash(&self) -> Vec<u8> {
         let mut hasher = Sha512::new();
@@ -46,13 +46,13 @@ impl Proof {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_proof_creation() {
         let proof = Proof::new(vec![1; 64], ProofType::Range);
         assert_eq!(proof.proof_type, ProofType::Range);
     }
-    
+
     #[test]
     fn test_proof_hash() {
         let proof = Proof::new(vec![1; 64], ProofType::Range);
